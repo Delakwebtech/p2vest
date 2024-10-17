@@ -1,4 +1,4 @@
-# Blog API
+# Task Management API
 
 >API for multi-user task management 
 

@@ -17,7 +17,7 @@ sequelize.authenticate()
     console.log('Database connected successfully');
 
     // Sync models and create tables if not exist
-    // return sequelize.sync({ force: true });
+    // return sequelize.sync();
   
   })
   .catch(err => {
@@ -35,6 +35,34 @@ const notificationRoutes = require('./routes/notification');
 
 
 const app = express();
+
+
+const http = require('http');
+const socketIo = require('socket.io');
+const { constants } = require("buffer");
+
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Listen for socket connections
+io.on('connection', (socket) => {
+    console.log('New client connected');
+
+    // Subscribe the user to their userId room
+    socket.on('join', (userId) => {
+      console.log(`User ${userId} has joined their room`);
+      socket.join(userId);
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
+
+ app.set('io', io);
+
+
 
 // Body Parser
 app.use(express.json());
@@ -57,32 +85,12 @@ app.use('/api/tasks', commentRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+const sendNotification = require('./controller/notification')
+
+// // Make sendNotification globally available in the app
+app.set('sendNotification', sendNotification); 
+
 app.use(errorHandler);
-
-const http = require('http');
-const socketIo = require('socket.io');
-
-const server = http.createServer(app);
-const io = socketIo(server);
-
-// Listen for socket connections
-io.on('connection', (socket) => {
-    console.log('New client connected');
-
-    // Handle disconnection
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
-});
-
-// Function to send notification via WebSocket
-const sendNotification = (userId, message) => {
-  // Emit notification to a specific userId
-  io.to(userId).emit('notification', { message });
-};
-
-// Make sendNotification globally available in the app
-app.set('sendNotification', sendNotification);
 
 const PORT = process.env.PORT || 5000;
 

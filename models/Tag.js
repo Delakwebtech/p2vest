@@ -12,8 +12,8 @@ const TaskTags = sequelize.define('TaskTags', {
     taskId: {
         type: DataTypes.INTEGER,
         references: {
-        model: Task,
-        key: 'id',
+            model: Task,
+            key: 'id',
         },
     },
 })

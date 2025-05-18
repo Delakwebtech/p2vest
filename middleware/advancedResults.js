@@ -81,5 +81,5 @@ const advancedResults = (model, include) => async (req, res, next) => {
     next();
   };
   
-  module.exports = advancedResults;
+module.exports = advancedResults;
   
